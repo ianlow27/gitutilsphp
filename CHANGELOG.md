@@ -5,5 +5,11 @@
 - : to do item 2
 - : to do item 3
 
-## v0.0.1-241102 - Initial version
-- a: initial comment
+## 0.0.2_241211-1242 - added options add2do upd2do and save2git
+-  option 'add2do': retrieves current version of project in Git
+-  option 'upd2do': 
+-  option 'save2git': update version numbers in all files in the proj folder
+-  gitutils.ini file for each project
+
+## 0.0.1_241102 - Initial version
+- initial comment

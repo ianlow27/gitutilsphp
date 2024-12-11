@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.1-241031
+Version: 0.0.2_241211-1242
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -10,19 +10,203 @@ Options:
    -newgit  Create new local Git repository             
    -s       save to local Git and remote GitHub repositories
 ";
+$aIniSettings = array();
+init();
+//echo $aIniSettings["email"]."\n";
+//echo $aIniSettings["author"]."\n";
+//echo $aIniSettings["GitHub account"]."\n";
+//echo $aIniSettings["firstCommitRef"]."\n";
+//return;
+//---------------------!!
 if(isset($argv[1])){
-  if($argv[1]=="-h"){
+  //-----------------------------------------
+  if($argv[1]=="-h"){            // Option -h
     echo $usage;
-  }else if($argv[1]=="-newgit"){  
+  //-----------------------------------------
+  }else if($argv[1]=="-newgit"){ // Option -newgit
     newlocalgit(); 
-  }else if($argv[1]=="-n"){  
+  //-----------------------------------------
+  }else if($argv[1]=="-save2git"){ // Option -upd2do  !!
+    echo "Please enter the new release description: "; $relcomment = trim(readline());
+    //get nextver - next version number
+    $output=null;
+    $retval=null;
+    exec('git reflog', $output, $retval);
+    $lastver="";
+    foreach($output as $outln){
+      if(preg_match("/\d+\.\d+\.\d+_\d{6,6}\-\d{4,4}/", $outln)){
+        $lastver = preg_replace("/(.*)(\d+\.\d+\.\d+_\d{6,6}\-\d{4,4})(.*)/", "$2", $outln);
+        break;
+      }
+    }//endforeach
+    $nextver =  getnextver($lastver, "now")."";
+    $nextver1 =  getnextver($lastver)."";
+
+    //iterate through project directory for matching files
+    $afiles = new DirectoryIterator("./");
+    $prjdir = basename(realpath("./"));
+    $langtype = "";
+    foreach(explode(" ","go php js html py") as $sfx){
+      if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+        $langtype = trim($sfx);
+        break;
+      }
+    }//endforeach
+    $nextver1 = preg_replace("/([\.]{1,1})/", "\\.", $nextver1);
+    $nextver1 = preg_replace("/([\-]{1,1})/", "\\-", $nextver1);
+
+    foreach ($afiles as $file) {
+      if($file->isFile()) {
+        if(substr($file, strlen($file)-(strlen($langtype)+1)) == ".".$langtype){
+          echo $file."____". $nextver1."_____". $nextver."\n";
+          copy($file, $file."_".date("ymd-Hi").".bak");
+          file_put_contents($file,
+            preg_replace("/".$nextver1."/", $nextver,
+               file_get_contents($file)) 
+            );
+        }//endif
+      }//endif
+    }//endforeach
+    $file = "./CHANGELOG.md";
+    file_put_contents($file,
+      preg_replace("/^\\- (cmp|2do|wip|del)\s*\\:/m", "- ",
+        preg_replace("/".$nextver1."/", $nextver,
+          preg_replace("/\\[___LEAVE COMMENT BLANK___\\]/", $relcomment,
+            file_get_contents($file)) 
+          )
+        )
+      );
+      save2git();
+
+    return;
+  //-----------------------------------------
+  }else if($argv[1]=="-upd2do"){ // Option -upd2do 
+    $achnglog = explode("\n", file_get_contents("./CHANGELOG.md"));
+    $strout="";
+    for($i=0; $i<count($achnglog); $i++){ // as $line){
+      $line = trim($achnglog[$i]);
+      if( (substr($line,0,6)=='- wip:') ||
+          (substr($line,0,6)=='- 2do:') ||
+          (substr($line,0,6)=='- del:') ||
+          (substr($line,0,6)=='- cmp:') ){
+        if($strout != "") $strout.="%%%";
+        $strout.=$line;
+      }
+    }//endfor
+    $atmp1 = explode("%%%", $strout);
+    $count = 0;
+    foreach($atmp1 as $ln){
+       $count++;
+       echo $count. ") ". $ln."\n";
+    }//endforeach
+    echo "Please enter the line you wish to update: "; $selline = trim(readline());
+    echo "[[". $atmp1[((int)$selline) - 1]."]]\n";
+    echo "Please enter the status (2do/wip/cmp/del) or 'Enter' for no change: "; $selstatus = trim(readline());
+    echo "Please enter the new description or 'Enter' for no change: "; $selnewdesc = trim(readline());
+    echo "Please enter the additional description or 'Enter' for none: "; $seladddesc = trim(readline());
+    if(!$selstatus){
+       $selstatus = trim(substr($atmp1[((int)$selline) - 1], 2, 3));
+    }
+    if(!$selnewdesc){
+       $selnewdesc = trim(substr($atmp1[((int)$selline) - 1], 6));
+    }
+    $newline = "- ".$selstatus.": ". $selnewdesc . ($seladddesc ? ", ".$seladddesc : "");
+
+    $strout = "";
+    for($i=0; $i<count($achnglog); $i++){ // as $line){
+      $line = trim($achnglog[$i]);
+      if($line == trim($atmp1[((int)$selline) - 1]) ){
+        $strout.=$newline."\n";
+      }else {
+        $strout.=$line."\n";
+      }
+    }//endfor
+    file_put_contents("./CHANGELOG.md", $strout);
+    return;
+  //-----------------------------------------
+  }else if($argv[1]=="-add2do"){ // Option -add2do 
+    echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
+    $output=null;
+    $retval=null;
+    exec('git reflog', $output, $retval);
+    $lastver="";
+    foreach($output as $outln){
+      if(preg_match("/\d+\.\d+\.\d+_\d{6,6}\-\d{4,4}/", $outln)){
+        $lastver = preg_replace("/(.*)(\d+\.\d+\.\d+_\d{6,6}\-\d{4,4})(.*)/", "$2", $outln);
+        break;
+      }
+    }//endforeach
+ echo $lastver."\n";
+    $nextver =  getnextver($lastver)."";
+
+
+    $afiles = new DirectoryIterator("./");
+    $prjdir = basename(realpath("./"));
+    $langtype = "";
+    foreach(explode(" ","go php js html py") as $sfx){
+      if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+        $langtype = trim($sfx);
+        break;
+      }
+    }//endforeach
+    $lastver1 = preg_replace("/([\.]{1,1})/", "\\.", $lastver);
+    $lastver1 = preg_replace("/([\-]{1,1})/", "\\-", $lastver1);
+echo $lastver."____".$nextver."\n";
+
+    foreach ($afiles as $file) {
+      if($file->isFile()) {
+        if(substr($file, strlen($file)-(strlen($langtype)+1)) == ".".$langtype){
+          echo $file."____". $lastver1."_____". $nextver."\n";
+          copy($file, $file."_".date("ymd-Hi").".bak");
+          file_put_contents($file,
+            preg_replace("/".$lastver1."/", $nextver,
+               file_get_contents($file)) 
+            );
+        }//endif
+      }//endif
+    }//endforeach
+
+    $achnglog = explode("\n", file_get_contents("./CHANGELOG.md"));
+    $nextverexists=False;
+    $strout="";
+    $prevline="";
+    for($i=0; $i<count($achnglog); $i++){ // as $line){
+      $line = trim($achnglog[$i]);
+      if(substr($line,0,strlen($nextver)+3)=="## ".$nextver.""){
+        $nextverexists=True;
+      }
+      if(substr($line,0,strlen($lastver)+3)=="## ".$lastver.""){
+        if(!$nextverexists){
+          $strout.="\n## ". $nextver. " - [___LEAVE COMMENT BLANK___]\n";
+        }
+        $strout.="- 2do: ".$desc2do."";
+        $strout.="\n\n".$line."\n";
+      }else {
+        if($line){
+          $strout.=$line."\n";
+        }else {
+          if(isset($achnglog[$i+1]))
+            if(($prevline)&&(substr($achnglog[$i+1],0,3)=="## ")){
+              if((substr($achnglog[$i+1],0,strlen($lastver)+3)!="## ".$lastver))
+                $strout.=$line."\n";
+            }
+        }
+      }
+      $prevline=$line;
+    }//endfor
+echo $strout."\n";
+    file_put_contents("./CHANGELOG.md", $strout);
+
+    return;
+  //-----------------------------------------
+  }else if($argv[1]=="-n"){      // Option -n (new)
     echo "Please enter the following information or press 'Enter' for default...\n";
     echo "Project name (defaults to 'myprojphp'): "; $projname = trim(readline());
     if($projname=="") $projname = "myprojphp";
     echo $projname. " ?? (defaults to 'facilitates text processing'): "; $desc = trim(readline());
-    echo "Email (defaults to 'fbloggs@youremail.com'): "; $email = trim(readline());
-    echo "Author name (defaults to 'Fred Bloggs'): "; $author = trim(readline());
-    echo "GitHub account name (defaults to 'fredbloggs'): "; $githubacct = trim(readline()); 
+    echo "Email (defaults to '". $aIniSettings["email"] ."'): "; $email = trim(readline()); 
+    echo "Author name (defaults to '". $aIniSettings["author"] ."'): "; $author = trim(readline()); 
+    echo "GitHub account name (defaults to '". $aIniSettings["GitHub account"] ."'): "; $githubacct = trim(readline());  
     echo "Usage Rights (defaults to 'MIT License'): "; $usglic = trim(readline());
     $strtfile="";
     if(substr($projname,-2)=="go"){
@@ -36,12 +220,12 @@ if(isset($argv[1])){
     }else if(substr($projname,-3)=="php"){ 
       $strtfile = preg_replace("/php$/", ".php", $projname);
     }
-    if($strtfile=="") $strtfile = "myproj.php";
-    if($desc=="") $desc = "facilitates text processing";
-    if($email=="")   $email   = "fbloggs@youremail.com"; 
-    if($author=="")   $author   = "Fred Bloggs";
-    if($githubacct=="")   $githubacct   = "fredbloggs";
-    if($usglic=="")   $usglic   = "MIT License";
+    if($strtfile=="")  $strtfile = "myproj.php";
+    if($desc=="")      $desc     = "facilitates text processing";
+    if($email=="")     $email    = $aIniSettings["email"];
+    if($author=="")    $author   = $aIniSettings["author"];
+    if($githubacct=="")$githubacct = $aIniSettings["GitHub account"];
+    if($usglic=="")    $usglic   = "MIT License";
     if(!file_exists("./".$projname)){ mkdir($projname); }
     //-STARTER SOURCECODE FILE-----  
 //unlink("./".$projname. "/". $strtfile); //temporary
@@ -70,7 +254,7 @@ TO DO!!
 <b>
 github.com/".$githubacct ."/". $projname . "
 </b>
-- v0.0.1-". date("ymd") ." 
+- ". $aIniSettings["firstCommitRef"]. " 
 |". $projname. " ". $desc. "
 |Author: ". $author. "
 |Copyright (c) ". date("Y") . " ". $author. "
@@ -107,7 +291,7 @@ function func1(){
 "<?php
 \$usage = \"
   Usage: php \$argv[0] [-h]
-Version: v0.0.1-".date("ymd")."
+Version: ". $aIniSettings["firstCommitRef"] . "
   About: \$argv[0] ". $desc. "
  Author: ". $author. " | Date: ". date("Y-m-d"). " | Copyright (c) ". date("Y"). " ". $author.
          " | Usage Rights: ". $usglic. "
@@ -147,7 +331,7 @@ if(isset(\$argv[1])){
 - : to do item 1
 - : to do item 2
 - : to do item 3\n
-## v0.0.1-" .date("ymd"). " - Initial version
+## ". $aIniSettings["firstCommitRef"]. " - Initial version
 - a: initial comment
 ");
     }
@@ -171,6 +355,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 *.swo
 *.log
 *.tmp
+*.old
+0*buff
+0*buf
+*.bck
+*.bkp
+*.bak
 *~
 ");
     }//endif
@@ -179,8 +369,21 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
   }
 }
 //----------------------------------
+function save2git(){ 
+global $nextver, $relcomment;
+  $projname = basename(realpath("./"));
+  if( runcmd('git status') == "On branch main"){
+    runcmd('git add .');
+    runcmd('git commit -m "'. $nextver. ' - ' . $relcomment . '"');
+    echo "\nIMPORTANT! PLEASE NOW FOLLOW THESE STEPS:\n".
+      "1. Ensure that you are connected to the internet.\n".
+      "2. Run this command from your '".$projname."' local folder:\n".
+      "   git push -u origin main\n\n";
+  }
+}//endfunc
+//----------------------------------
 function newlocalgit(){ 
-global $projname, $email, $author, $githubacct; 
+global $projname, $email, $author, $githubacct, $aIniSettings; //!! 
   $currdir = getcwd();
   chdir($projname);
   if( runcmd('git status') == "On branch main"){
@@ -189,7 +392,8 @@ global $projname, $email, $author, $githubacct;
     runcmd('git add .');
     runcmd('git config user.email "'.$email.'"');
     runcmd('git config user.name "'.$author.'"');
-    runcmd('git commit -m "v0.0.1_'.date("ymd-Hi") .' - Initial commit"');
+    //runcmd('git commit -m "0.0.1_'.date("ymd-Hi") .' - Initial commit"'); !!
+    runcmd('git commit -m "'. $aIniSettings["firstCommitRef"].' - Initial commit"');
     runcmd('git remote add origin https://github.com/'.$githubacct.'/'.$projname.'.git');
     runcmd('git branch -M main');
     echo "\nIMPORTANT! PLEASE NOW FOLLOW THESE STEPS:\n".
@@ -220,5 +424,47 @@ function runcmd($cmd){
   }
   return "failure";
 }//endfunc
-//----------------------------------!!
+//----------------------------------
+function init(){ 
+global $aIniSettings;
+  $aIniSettings["email"]="fredbloggs@youremail.com";
+  $aIniSettings["author"]="Fred Bloggs";
+  $aIniSettings["GitHub account"]="fredbloggs";
+  $aIniSettings["firstCommitRef"]="0.0.1_". date("ymd-Hi"); //!!
+  $aini = explode("\n",file_get_contents(dirname(__FILE__)."/gitutils.ini"));
+  foreach($aini as $setting){
+    $setting=trim($setting);
+    if(!isset($setting)) continue;
+    $asetting = explode("=", $setting);
+    if(isset($asetting[1]))
+      $aIniSettings[$asetting[0]] = $asetting[1];
+  }//endforeach
+}
+//----------------------------------
+function vers3digits($pvers){ //!!
+  $avers = preg_split("/[\._\-]/", $pvers);
+  return 
+     sprintf("%03d", $avers[0]).".".
+     sprintf("%03d", $avers[1]).".".
+     sprintf("%03d", $avers[2])."_".
+     $avers[3]."-".$avers[4];
+}//endfunc
+//----------------------------------
+function getnextver($pvers, $popt=""){
+  $avers = preg_split("/[\._\-]/", $pvers);
+  $timestamp = "ymd-Hi";
+  if($popt == "now"){
+    $timestamp = date("ymd-Hi");
+  }
+  return 
+     sprintf("%01d", $avers[0]).".".
+     sprintf("%01d", $avers[1]).".".
+     sprintf("%01d", ((int)$avers[2])+1)."_".
+     $timestamp;
+}//endfunc
+//----------------------------------
+//----------------------------------
+//----------------------------------
+//----------------------------------
+//----------------------------------
 ?>
