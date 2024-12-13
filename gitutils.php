@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.2_241211-1242
+Version: 0.0.3_241213-1533
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -26,9 +26,53 @@ if(isset($argv[1])){
   }else if($argv[1]=="-newgit"){ // Option -newgit
     newlocalgit(); 
   //-----------------------------------------
+  }else if($argv[1]=="-upddep"){ // Option -upddepend  !!
+  //-----------------------------------------
+  }else if($argv[1]=="-adddep"){ // Option -adddepend  !!
+    echo "Please enter the relative path to the dependent file: "; $depfile = trim(readline());
+    if(!file_exists($depfile)){
+//if(False){
+      echo "ERROR: Sorry, this file does not exist!";
+      return; 
+    }
+//$depfile = "../../jsproj/txutilsjs/txutils.js";
+//$depfile = "/home/Administrator/temp/prj1php/prj1.php";
+     $depdir  = dirname($depfile);
+     $depprj  = basename($depdir);
+     $depfnm  = basename($depfile);
+     /*
+     chdir(dirname($depfile))."\n";
+     echo (getcwd());
+     exec('git status', $output, $retval);
+print_r($output);
+     $bTreeClean=False;
+     foreach($output as $ln1){
+       $ln1 = trim($ln1);
+       if($ln1 == "nothing to commit, working tree clean"){
+         $bTreeClean=True;
+       }
+     }//endforeach
+     //if($bTreeClean){
+     */
+     if(isgitclean(dirname($depfile))){
+       echo "Tree is clean!\n";
+     }else {
+       echo "ERROR: Sorry, please please commit all changes in your folder '".dirname($depfile)."' before continuing.\n";
+       return;
+     }
+     $lastver = getlastver($depdir);
+     echo getcwd().">___".$lastver."\n";
+     $strout =  mdfileAddBefH2("./README", "LICENSE", "DEPENDENCIES",
+                  "\nThis application references external file(s) available from the '". $aIniSettings["GitHub account"] ."' GitHub user account. The project name, recommended version, and relative path are as follows:\n|project|version|relative path|\n |:-|:-|:-|",
+                  "|". $depprj. "|". $lastver. "|". $depfile. "|");
+     echo $strout;
+     file_put_contents("./README.md", $strout);
+     return;
+  //-----------------------------------------
   }else if($argv[1]=="-save2git"){ // Option -upd2do  !!
     echo "Please enter the new release description: "; $relcomment = trim(readline());
     //get nextver - next version number
+    /*
     $output=null;
     $retval=null;
     exec('git reflog', $output, $retval);
@@ -39,6 +83,8 @@ if(isset($argv[1])){
         break;
       }
     }//endforeach
+    */
+    $lastver = getlastver();
     $nextver =  getnextver($lastver, "now")."";
     $nextver1 =  getnextver($lastver)."";
 
@@ -126,6 +172,7 @@ if(isset($argv[1])){
   //-----------------------------------------
   }else if($argv[1]=="-add2do"){ // Option -add2do 
     echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
+    /*
     $output=null;
     $retval=null;
     exec('git reflog', $output, $retval);
@@ -136,7 +183,10 @@ if(isset($argv[1])){
         break;
       }
     }//endforeach
+    */
+   $lastver = getlastver();
  echo $lastver."\n";
+//return;
     $nextver =  getnextver($lastver)."";
 
 
@@ -166,6 +216,8 @@ echo $lastver."____".$nextver."\n";
       }//endif
     }//endforeach
 
+    //------------------------------
+    /*
     $achnglog = explode("\n", file_get_contents("./CHANGELOG.md"));
     $nextverexists=False;
     $strout="";
@@ -194,8 +246,13 @@ echo $lastver."____".$nextver."\n";
       }
       $prevline=$line;
     }//endfor
+    */
+    $strout =  mdfileAddBefH2("./CHANGELOG", $lastver, $nextver,
+                  " - [___LEAVE COMMENT BLANK___]",
+                  "- 2do: ".$desc2do."");
+    //------------------------------
 echo $strout."\n";
-    file_put_contents("./CHANGELOG.md", $strout);
+    file_put_contents("./CHANGELOG.md", $strout, );
 
     return;
   //-----------------------------------------
@@ -330,7 +387,10 @@ if(isset(\$argv[1])){
 ## TO DO LIST
 - : to do item 1
 - : to do item 2
-- : to do item 3\n
+- : to do item 3
+
+## NOTES
+
 ## ". $aIniSettings["firstCommitRef"]. " - Initial version
 - a: initial comment
 ");
@@ -463,6 +523,86 @@ function getnextver($pvers, $popt=""){
      $timestamp;
 }//endfunc
 //----------------------------------
+function isgitclean($pprjdir="./"){ //!!
+  $pprjdir = realpath($pprjdir);
+  $origdir = getcwd();
+  chdir($pprjdir);
+  $output = null;
+  $retval = null;
+  exec('git status', $output, $retval);
+  $bTreeClean=False;
+  foreach($output as $ln1){
+    $ln1 = trim($ln1);
+    if($ln1 == "nothing to commit, working tree clean"){
+      $bTreeClean=True;
+      break;
+    }
+  }//endforeach
+  chdir($origdir);
+  return $bTreeClean;
+}//endfunc
+//----------------------------------
+function getlastver($pprjdir="./"){ //!!
+  $pprjdir = realpath($pprjdir);
+  $origdir = getcwd();
+  chdir($pprjdir);
+  $output = null;
+  $retval = null;
+  exec('git reflog', $output, $retval);
+  $lastver="";
+print_r($output);
+  foreach($output as $outln){
+    if(preg_match("/\d+\.\d+\.\d+_\d{6,6}\-\d{4,4}/", $outln)){
+      $lastver = preg_replace("/(.*)(\d+\.\d+\.\d+_\d{6,6}\-\d{4,4})(.*)/", "$2", $outln);
+      break;
+    }
+  }//endforeach
+  chdir($origdir);
+  return $lastver;
+}//endfunc
+//----------------------------------
+function  mdfileAddBefH2($pmdfile, $lastver, $nextver, $pcomment, $pdescline){
+/*
+$strout =  mdfileAddBefH2("./", "./CHANGELOG", $lastver, $nextver,
+                  " - [___LEAVE COMMENT BLANK___]",
+                  "- 2do: ".$desc2do."");
+*/
+echo $pmdfile."_1\n";
+  $pmdfile = realpath($pmdfile.".md");
+echo $pmdfile."_2\n";
+  $pprjdir = dirname($pmdfile);
+echo $pmdfile."_3\n";
+
+  $achnglog = explode("\n", file_get_contents($pmdfile));
+  $nextverexists=False;
+  $strout="";
+  $prevline="";
+  for($i=0; $i<count($achnglog); $i++){ // as $line){
+    $line = trim($achnglog[$i]);
+    if(substr($line,0,strlen($nextver)+3)=="## ".$nextver.""){
+      $nextverexists=True;
+    }
+    if(substr($line,0,strlen($lastver)+3)=="## ".$lastver.""){
+      if(!$nextverexists){
+        $strout.="\n## ". $nextver. $pcomment . "\n";
+      }
+      $strout.= $pdescline;
+      $strout.= "\n\n".$line."\n";
+    }else {
+      if($line){
+        $strout.=$line."\n";
+      }else {
+        if(isset($achnglog[$i+1]))
+          if(($prevline)&&(substr($achnglog[$i+1],0,3)=="## ")){
+            if((substr($achnglog[$i+1],0,strlen($lastver)+3)!="## ".$lastver))
+              $strout.=$line."\n";
+          }
+      }
+    }
+    $prevline=$line;
+  }//endfor
+  return $strout;
+}//endfunc
 //----------------------------------
 //----------------------------------
 //----------------------------------
