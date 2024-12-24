@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.3_241213-1533
+Version: 0.0.4_241224-1817
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -304,8 +304,11 @@ TO DO!!
 ");
       }else if(substr($projname,-4)=="html"){ 
         file_put_contents("./".$projname."/".$strtfile, 
-"<!DOCTYPE html><html><head>
-<meta name='viewport' content='width=device-width, initial-scale=1' />
+"<!DOCTYPE html><html><head><script>
+let appref='". $projname. "';
+</script>
+<meta charset='UTF-8'/>
+<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0' />
 </head>
 <body>
 <b>
