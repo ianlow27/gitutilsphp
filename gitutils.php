@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.4_241224-1817
+Version: 0.0.5_241231-1841
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -101,9 +101,11 @@ print_r($output);
     $nextver1 = preg_replace("/([\.]{1,1})/", "\\.", $nextver1);
     $nextver1 = preg_replace("/([\-]{1,1})/", "\\-", $nextver1);
 
-    foreach ($afiles as $file) {
+   foreach ($afiles as $file) {
+    foreach(explode(" ","go php js html py") as $sfx){
+     //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
       if($file->isFile()) {
-        if(substr($file, strlen($file)-(strlen($langtype)+1)) == ".".$langtype){
+        if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){
           echo $file."____". $nextver1."_____". $nextver."\n";
           copy($file, $file."_".date("ymd-Hi").".bak");
           file_put_contents($file,
@@ -112,7 +114,9 @@ print_r($output);
             );
         }//endif
       }//endif
+     //}//endif
     }//endforeach
+   }//endforeach
     $file = "./CHANGELOG.md";
     file_put_contents($file,
       preg_replace("/^\\- (cmp|2do|wip|del)\s*\\:/m", "- ",
@@ -203,9 +207,11 @@ print_r($output);
     $lastver1 = preg_replace("/([\-]{1,1})/", "\\-", $lastver1);
 echo $lastver."____".$nextver."\n";
 
-    foreach ($afiles as $file) {
+   foreach ($afiles as $file) {
+    foreach(explode(" ","go php js html py") as $sfx){
+     //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
       if($file->isFile()) {
-        if(substr($file, strlen($file)-(strlen($langtype)+1)) == ".".$langtype){
+        if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){
           echo $file."____". $lastver1."_____". $nextver."\n";
           copy($file, $file."_".date("ymd-Hi").".bak");
           file_put_contents($file,
@@ -214,7 +220,9 @@ echo $lastver."____".$nextver."\n";
             );
         }//endif
       }//endif
+     //}//endif
     }//endforeach
+   }//endforeach
 
     //------------------------------
     /*

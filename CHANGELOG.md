@@ -7,6 +7,9 @@
 
 ## Notes
 
+## 0.0.5_241231-1841 - Additional enhancements
+-  Additional enhancements
+
 ## 0.0.4_241224-1817 - Additional enhancements
 -  Additional enhancements
 
