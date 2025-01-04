@@ -1,14 +1,20 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.5_241231-1841
+Version: 0.0.6_250104-1938
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
-   -h       Display information on help and run options
-   -n       Create a new project folder with default starter files and local git repository
-   -newgit  Create new local Git repository             
-   -s       save to local Git and remote GitHub repositories
+   -h            Display information on help and run options
+   -n            Create a new project folder with default starter files and local git repository
+   N/A!! -newgit       Create new local Git repository             
+   -add2do       Add a to do item to Change log and update to status 'Changes' mode
+   -upd2do       Update a to do item to Change log and update to status 'Changes' mode
+   -save2git     Save and commit changes to git and update to status 'Committed' mode
+   -addsave2git  Update to status 'Changes' mode and then save and update to 'Committed' mode
+   -s            save to local Git and remote GitHub repositories
+   N/A!! -adddep            Add details of dependencies to a project
+   N/A!! -upddep            Update details of dependencies to a project
 ";
 $aIniSettings = array();
 init();
@@ -69,21 +75,15 @@ print_r($output);
      file_put_contents("./README.md", $strout);
      return;
   //-----------------------------------------
-  }else if($argv[1]=="-save2git"){ // Option -upd2do  !!
+  }else if($argv[1]=="-addsave2git"){ // Option -upd2do  !!
     echo "Please enter the new release description: "; $relcomment = trim(readline());
-    //get nextver - next version number
+    add2do($relcomment);
+    save2git($relcomment);
+    savecommit2git();
+  }else if($argv[1]=="-save2git"){ // Option -upd2do  !!
+    save2git();
     /*
-    $output=null;
-    $retval=null;
-    exec('git reflog', $output, $retval);
-    $lastver="";
-    foreach($output as $outln){
-      if(preg_match("/\d+\.\d+\.\d+_\d{6,6}\-\d{4,4}/", $outln)){
-        $lastver = preg_replace("/(.*)(\d+\.\d+\.\d+_\d{6,6}\-\d{4,4})(.*)/", "$2", $outln);
-        break;
-      }
-    }//endforeach
-    */
+    echo "Please enter the new release description: "; $relcomment = trim(readline());
     $lastver = getlastver();
     $nextver =  getnextver($lastver, "now")."";
     $nextver1 =  getnextver($lastver)."";
@@ -126,7 +126,8 @@ print_r($output);
           )
         )
       );
-      save2git();
+    */
+    savecommit2git();
 
     return;
   //-----------------------------------------
@@ -175,22 +176,11 @@ print_r($output);
     return;
   //-----------------------------------------
   }else if($argv[1]=="-add2do"){ // Option -add2do 
-    echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
+    add2do();
     /*
-    $output=null;
-    $retval=null;
-    exec('git reflog', $output, $retval);
-    $lastver="";
-    foreach($output as $outln){
-      if(preg_match("/\d+\.\d+\.\d+_\d{6,6}\-\d{4,4}/", $outln)){
-        $lastver = preg_replace("/(.*)(\d+\.\d+\.\d+_\d{6,6}\-\d{4,4})(.*)/", "$2", $outln);
-        break;
-      }
-    }//endforeach
-    */
-   $lastver = getlastver();
- echo $lastver."\n";
-//return;
+    echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
+    $lastver = getlastver();
+    echo $lastver."\n";
     $nextver =  getnextver($lastver)."";
 
 
@@ -205,7 +195,7 @@ print_r($output);
     }//endforeach
     $lastver1 = preg_replace("/([\.]{1,1})/", "\\.", $lastver);
     $lastver1 = preg_replace("/([\-]{1,1})/", "\\-", $lastver1);
-echo $lastver."____".$nextver."\n";
+    echo $lastver."____".$nextver."\n";
 
    foreach ($afiles as $file) {
     foreach(explode(" ","go php js html py") as $sfx){
@@ -225,42 +215,13 @@ echo $lastver."____".$nextver."\n";
    }//endforeach
 
     //------------------------------
-    /*
-    $achnglog = explode("\n", file_get_contents("./CHANGELOG.md"));
-    $nextverexists=False;
-    $strout="";
-    $prevline="";
-    for($i=0; $i<count($achnglog); $i++){ // as $line){
-      $line = trim($achnglog[$i]);
-      if(substr($line,0,strlen($nextver)+3)=="## ".$nextver.""){
-        $nextverexists=True;
-      }
-      if(substr($line,0,strlen($lastver)+3)=="## ".$lastver.""){
-        if(!$nextverexists){
-          $strout.="\n## ". $nextver. " - [___LEAVE COMMENT BLANK___]\n";
-        }
-        $strout.="- 2do: ".$desc2do."";
-        $strout.="\n\n".$line."\n";
-      }else {
-        if($line){
-          $strout.=$line."\n";
-        }else {
-          if(isset($achnglog[$i+1]))
-            if(($prevline)&&(substr($achnglog[$i+1],0,3)=="## ")){
-              if((substr($achnglog[$i+1],0,strlen($lastver)+3)!="## ".$lastver))
-                $strout.=$line."\n";
-            }
-        }
-      }
-      $prevline=$line;
-    }//endfor
-    */
     $strout =  mdfileAddBefH2("./CHANGELOG", $lastver, $nextver,
                   " - [___LEAVE COMMENT BLANK___]",
                   "- 2do: ".$desc2do."");
     //------------------------------
-echo $strout."\n";
+    echo $strout."\n";
     file_put_contents("./CHANGELOG.md", $strout, );
+    */
 
     return;
   //-----------------------------------------
@@ -440,16 +401,18 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
   }
 }
 //----------------------------------
-function save2git(){ 
+function savecommit2git(){ 
 global $nextver, $relcomment;
   $projname = basename(realpath("./"));
+  echo "\nIMPORTANT! PLEASE NOW FOLLOW THESE STEPS:\n".
+       "1. Ensure that you are connected to the internet.\n".
+       "2. Run this command from your '".$projname."' local folder:\n".
+       "3. Then press 'Enter' to continue or 'Ctrl-C' to quit.";
+  $lresp = readline();
   if( runcmd('git status') == "On branch main"){
     runcmd('git add .');
     runcmd('git commit -m "'. $nextver. ' - ' . $relcomment . '"');
-    echo "\nIMPORTANT! PLEASE NOW FOLLOW THESE STEPS:\n".
-      "1. Ensure that you are connected to the internet.\n".
-      "2. Run this command from your '".$projname."' local folder:\n".
-      "   git push -u origin main\n\n";
+    runcmd('git push -u origin main');
   }
 }//endfunc
 //----------------------------------
@@ -615,7 +578,110 @@ echo $pmdfile."_3\n";
   return $strout;
 }//endfunc
 //----------------------------------
+function add2do($pdesc=""){
+  $desc2do = "";
+  if(isset($pdesc)){
+    $desc2do = "Amendments as per the release description";
+  }else {
+    echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
+  } 
+  $lastver = getlastver();
+  echo $lastver."\n";
+  $nextver =  getnextver($lastver)."";
+  $afiles = new DirectoryIterator("./");
+  $prjdir = basename(realpath("./"));
+  /*
+  $langtype = "";
+  foreach(explode(" ","go php js html py") as $sfx){
+    if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+      $langtype = trim($sfx);
+      break;
+    }
+  }//endforeach
+  */
+  $lastver1 = preg_replace("/([\.]{1,1})/", "\\.", $lastver);
+  $lastver1 = preg_replace("/([\-]{1,1})/", "\\-", $lastver1);
+  echo $lastver."____".$nextver."\n";
+  foreach ($afiles as $file) {
+   foreach(explode(" ","go php js html py") as $sfx){
+    //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+     if($file->isFile()) {
+       if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){
+         echo $file."____". $lastver1."_____". $nextver."\n";
+         copy($file, $file."_".date("ymd-Hi").".bak");
+         file_put_contents($file,
+           preg_replace("/".$lastver1."/", $nextver,
+              file_get_contents($file)) 
+           );
+       }//endif
+     }//endif
+    //}//endif
+   }//endforeach
+  }//endforeach
+  //------------------------------
+  $strout =  mdfileAddBefH2("./CHANGELOG", $lastver, $nextver,
+                " - [___LEAVE COMMENT BLANK___]",
+                "- 2do: ".$desc2do."");
+  //------------------------------
+  echo $strout."\n";
+  file_put_contents("./CHANGELOG.md", $strout, );
+}//endfunc
 //----------------------------------
+function save2git($pdesc=""){
+global $nextver, $relcomment;
+  $relcomments = "";
+  if(isset($pdesc)){
+    $relcomments = $pdesc;
+  }else {
+    echo "Please enter the new release description: "; $relcomment = trim(readline());
+  }
+  $lastver = getlastver();
+  $nextver =  getnextver($lastver, "now")."";
+  $nextver1 =  getnextver($lastver)."";
+
+  //iterate through project directory for matching files
+  $afiles = new DirectoryIterator("./");
+  $prjdir = basename(realpath("./"));
+  /*
+  $langtype = "";
+  foreach(explode(" ","go php js html py") as $sfx){
+    if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+      $langtype = trim($sfx);
+      break;
+    }
+  }//endforeach
+  */
+  $nextver1 = preg_replace("/([\.]{1,1})/", "\\.", $nextver1);
+  $nextver1 = preg_replace("/([\-]{1,1})/", "\\-", $nextver1);
+
+ foreach ($afiles as $file) {
+  foreach(explode(" ","go php js html py") as $sfx){
+   //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
+    if($file->isFile()) {
+      if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){
+        echo $file."____". $nextver1."_____". $nextver."\n";
+        copy($file, $file."_".date("ymd-Hi").".bak");
+        file_put_contents($file,
+          preg_replace("/".$nextver1."/", $nextver,
+             file_get_contents($file)) 
+          );
+      }//endif
+    }//endif
+   //}//endif
+  }//endforeach
+ }//endforeach
+  $file = "./CHANGELOG.md";
+  file_put_contents($file,
+    preg_replace("/^\\- (cmp|2do|wip|del)\s*\\:/m", "- ",
+      preg_replace("/".$nextver1."/", $nextver,
+        preg_replace("/\\[___LEAVE COMMENT BLANK___\\]/", $relcomment,
+          file_get_contents($file)
+        ) 
+      )
+    )
+  );
+
+}//endfunc
 //----------------------------------
 //----------------------------------
 ?>
