@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.6_250104-1938
+Version: 0.0.7_250106-2007
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -489,6 +489,8 @@ function getnextver($pvers, $popt=""){
   $timestamp = "ymd-Hi";
   if($popt == "now"){
     $timestamp = date("ymd-Hi");
+  }else {
+    return "0.0.7_250106-2007";
   }
   return 
      sprintf("%01d", $avers[0]).".".
@@ -580,7 +582,7 @@ echo $pmdfile."_3\n";
 //----------------------------------
 function add2do($pdesc=""){
   $desc2do = "";
-  if(isset($pdesc)){
+  if($pdesc!=""){
     $desc2do = "Amendments as per the release description";
   }else {
     echo "Please enter the new 'to-do' description: "; $desc2do = trim(readline());
@@ -630,7 +632,7 @@ function add2do($pdesc=""){
 function save2git($pdesc=""){
 global $nextver, $relcomment;
   $relcomments = "";
-  if(isset($pdesc)){
+  if($pdesc!=""){
     $relcomments = $pdesc;
   }else {
     echo "Please enter the new release description: "; $relcomment = trim(readline());

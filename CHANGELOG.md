@@ -7,6 +7,9 @@
 
 ## Notes
 
+## 0.0.7_250106-2007 - Additional automation-related enhancements
+-  Amendments as per the release description
+
 ## 0.0.6_250104-1938 - Added new option -addsave2git to save, commit, and upload to the remote repository using 1 command. Also add the FUNDING.yml file.
 -  Amendments as per the release description
 
