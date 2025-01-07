@@ -7,6 +7,9 @@
 
 ## Notes
 
+## 0.0.8_250107-1029 - Bugfix to getnextversion() returning incorrect literal date instead of placeholder
+-  Amendments as per the release description
+
 ## 0.0.7_250106-2007 - Additional automation-related enhancements
 -  Amendments as per the release description
 

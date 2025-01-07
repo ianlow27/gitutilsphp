@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.7_250106-2007
+Version: 0.0.8_250107-1029
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -490,7 +490,7 @@ function getnextver($pvers, $popt=""){
   if($popt == "now"){
     $timestamp = date("ymd-Hi");
   }else {
-    return "0.0.7_250106-2007";
+    return "0.".   "0.0_".   "ymd-Hi";
   }
   return 
      sprintf("%01d", $avers[0]).".".
