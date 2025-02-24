@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.10_250224-1830s
+Version: 0.0.11_250224-1831
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:

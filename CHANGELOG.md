@@ -7,6 +7,9 @@
 
 ## Notes
 
+## 0.0.11_250224-1831 - Minor bugfix to date format
+-  Amendments as per the release description
+
 ## 0.0.10_250224-1830 - Minor bugfix to date format
 -  Amendments as per the release description
 
