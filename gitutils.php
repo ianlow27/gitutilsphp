@@ -1,7 +1,7 @@
 <?php
 $usage = "
   Usage: php $argv[0] [-h|n]
-Version: 0.0.8_250107-1029
+Version: 0.0.0_ymd_His
   About: $argv[0] facilitates the creation and saving of projects to git repositories
  Author: Ian Low | Date: 2024-10-31 | Copyright (c) 2024, Ian Low | Usage Rights: MIT License
 Options:
@@ -226,14 +226,14 @@ print_r($output);
     return;
   //-----------------------------------------
   }else if($argv[1]=="-n"){      // Option -n (new)
-    echo "Please enter the following information or press 'Enter' for default...\n";
+    echo "Please enter the following information or press 'Enter' for the default. For long text we recommend typing the details in a notepad-like app and then copying and pasting into the CLI prompt...\n";
     echo "Project name (defaults to 'myprojphp'): "; $projname = trim(readline());
     if($projname=="") $projname = "myprojphp";
     echo $projname. " ?? (defaults to 'facilitates text processing'): "; $desc = trim(readline());
     echo "Email (defaults to '". $aIniSettings["email"] ."'): "; $email = trim(readline()); 
     echo "Author name (defaults to '". $aIniSettings["author"] ."'): "; $author = trim(readline()); 
     echo "GitHub account name (defaults to '". $aIniSettings["GitHub account"] ."'): "; $githubacct = trim(readline());  
-    echo "Usage Rights (defaults to 'MIT License'): "; $usglic = trim(readline());
+    echo "License Type (apache2 (default), or mit, mpl, bsd0, bsd2, bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, or arr (All Rights Reserved)): "; $usglic = trim(readline());
     $strtfile="";
     if(substr($projname,-2)=="go"){
       $strtfile = preg_replace("/go$/", ".go", $projname);
@@ -251,7 +251,7 @@ print_r($output);
     if($email=="")     $email    = $aIniSettings["email"];
     if($author=="")    $author   = $aIniSettings["author"];
     if($githubacct=="")$githubacct = $aIniSettings["GitHub account"];
-    if($usglic=="")    $usglic   = "MIT License";
+    if($usglic=="")    $usglic   = "apache2";
     if(!file_exists("./".$projname)){ mkdir($projname); }
     //-STARTER SOURCECODE FILE-----  
 //unlink("./".$projname. "/". $strtfile); //temporary
@@ -287,7 +287,7 @@ github.com/".$githubacct ."/". $projname . "
 |". $projname. " ". $desc. "
 |Author: ". $author. "
 |Copyright (c) ". date("Y") . " ". $author. "
-|Usage Rights: ". $usglic ."
+|Usage Rights: ". licenseinfo($usglic, "code") ."
 <table style='width:95%;' border=0 cellspacing=0 cellpadding=0 >
 <tr>
 <td valign='top' style='width:69%;padding:0px;margin:0px;'>
@@ -323,7 +323,7 @@ function func1(){
 Version: ". $aIniSettings["firstCommitRef"] . "
   About: \$argv[0] ". $desc. "
  Author: ". $author. " | Date: ". date("Y-m-d"). " | Copyright (c) ". date("Y"). " ". $author.
-         " | Usage Rights: ". $usglic. "
+         " | License: ". licenseinfo($usglic, "code") . "
 Options:
     -h   Display help information including run options
     -n   Create a new instance
@@ -371,12 +371,7 @@ if(isset(\$argv[1])){
 //unlink("./".$projname. "/LICENSE.md" ); //temporary
     if(!file_exists("./".$projname. "/LICENSE.md" )){ 
       file_put_contents("./".$projname."/LICENSE.md",
-"MIT License\n
-Copyright (c) ". date("Y"). " ". $author."\n
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n
-");
+        licenseinfo($usglic, "file") );
     }
     //-.gitignore------------------- 
 //unlink("./".$projname. "/.gitignore" ); //temporary
@@ -592,20 +587,13 @@ function add2do($pdesc=""){
   $nextver =  getnextver($lastver)."";
   $afiles = new DirectoryIterator("./");
   $prjdir = basename(realpath("./"));
-  /*
-  $langtype = "";
-  foreach(explode(" ","go php js html py") as $sfx){
-    if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
-      $langtype = trim($sfx);
-      break;
-    }
-  }//endforeach
-  */
+  
+ 
   $lastver1 = preg_replace("/([\.]{1,1})/", "\\.", $lastver);
   $lastver1 = preg_replace("/([\-]{1,1})/", "\\-", $lastver1);
   echo $lastver."____".$nextver."\n";
   foreach ($afiles as $file) {
-   foreach(explode(" ","go php js html py") as $sfx){
+   foreach(explode(" ","prj go php js html py") as $sfx){
     //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
      if($file->isFile()) {
        if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){
@@ -629,6 +617,187 @@ function add2do($pdesc=""){
   file_put_contents("./CHANGELOG.md", $strout, );
 }//endfunc
 //----------------------------------
+function licenseinfo($usglic, $ptype){
+global $author, $githubacct;
+$lgithubacct = $githubacct;
+if(isset($lgithubacct)) $lgithubacct=" (github.com/".$lgithubacct.")";
+$outstr="";
+  if      ($usglic == "mit"){
+     if($ptype == "file"){
+       $outstr="MIT License\n
+Copyright (c) ". date("Y"). " ". $author. $lgithubacct. "\n
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n
+";
+     }else {
+       $outstr="MIT";
+     }
+  }else if($usglic == "mpl"){
+     if($ptype == "file"){
+       $outstr="Mozilla Public License 2.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This source code is licensed under the Mozilla Public License, v. 2.0; you may not use the resources from this project except in compliance with the License. You may obtain a copy of the License at\n
+http://mozilla.org/MPL/2.0/ \n
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an 'AS IS' basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.\n
+";
+     }else {
+       $outstr="MPL-2.0";
+     }
+  }else if($usglic == "bsd0"){
+     if($ptype == "file"){
+       $outstr="BSD Zero Clause License\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted.\n
+\n
+THE SOFTWARE IS PROVIDED 'AS IS' AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\n
+";
+     }else {
+       $outstr="0BSD";
+     }
+  }else if($usglic == "bsd2"){
+     if($ptype == "file"){
+       $outstr="BSD 2-Clause 'Simplified' License\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n
+THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n
+";
+     }else {
+       $outstr="BSD-2-Clause";
+     }
+  }else if($usglic == "bsd3"){
+     if($ptype == "file"){
+       $outstr="BSD 3-Clause 'Revised' License\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n
+This product includes software developed by ". $author.$lgithubacct.  ".\n
+3. Neither the name of the copyright holder nor the names the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n
+THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n
+";
+     }else {
+       $outstr="BSD-3-Clause";
+     }
+  }else if($usglic == "bsd4"){
+     if($ptype == "file"){
+       $outstr="BSD 4-Clause 'Original' License\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n
+3. All advertising materials mentioning features or use of this software must display the following acknowledgement:\n
+This product includes software developed by ". $author.$lgithubacct.  ".\n
+4. Neither the name of the copyright holder nor the names the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n
+THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n
+";
+     }else {
+       $outstr="BSD-4-Clause";
+     }
+  }else if($usglic == "cc0"){
+     if($ptype == "file"){
+       $outstr="Creative Commons Zero v1.0 Universal\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This code is dedicated to the public domain under the CC0-1.0 license:\b
+https://creativecommons.org/publicdomain/zero/1.0/ \n
+";
+     }else {
+       $outstr="CC0-1.0"; 
+     }
+  }else if($usglic == "ccby4"){
+     if($ptype == "file"){
+       $outstr="Creative Commons Attribution 4.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This code is licensed under the Creative Commons Attribution 4.0 International License.\n
+To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/\n
+";
+     }else {
+       $outstr="CC-BY-4.0";
+     }
+  }else if($usglic == "ccbysa4"){
+     if($ptype == "file"){
+       $outstr="Creative Commons Attribution ShareAlike4.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This code is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.\n
+To view a copy of this license, visit https://creativecommons.org/licenses/by-sa/4.0/\n
+";
+     }else {
+       $outstr="CC-BY-SA-4.0";
+     }
+  }else if($usglic == "gpl2"){
+     if($ptype == "file"){
+       $outstr="GNU General Public License v2.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation under version 2 of the License.\n
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n
+If you have not received a copy of the GNU General Public License along with this program, see <https://www.gnu.org/licenses/>.\n
+";
+     }else {
+       $outstr="GPL-2.0";
+     }
+  }else if($usglic == "gpl3"){
+     if($ptype == "file"){
+       $outstr="GNU General Public License v3.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation under version 3 of the License.\n
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n
+If you have not received a copy of the GNU General Public License along with this program, see <https://www.gnu.org/licenses/>.\n
+";
+     }else {
+       $outstr="GPL-3.0";
+     }
+  }else if($usglic == "lgpl2"){
+     if($ptype == "file"){
+       $outstr="GNU Lesser General Public License v2.1\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation under version 2.1 of the License.\n
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.\n
+If you have not received a copy of the GNU Lesser General Public License along with this program, see <https://www.gnu.org/licenses/>.\n
+";
+     }else {
+       $outstr="LGPL-2.1";
+     }
+  }else if($usglic == "lgpl3"){
+     if($ptype == "file"){
+       $outstr="GNU Lesser General Public License v3.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation under version 3 of the License.\n
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.\n
+If you have not received a copy of the GNU Lesser General Public License along with this program, see <https://www.gnu.org/licenses/>.\n
+";
+     }else {
+       $outstr="LGPL-3.0";
+     }
+  }else if($usglic == "arr"){
+     if($ptype == "file"){
+       $outstr="\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct.  ". All Rights Reserved.\n
+This software and all its contents, including source code, text, graphics, and logos, are the copyrighted property of ". $author. ". Unauthorized use, reproduction or distribution is strictly prohibited and may result in legal action.\n
+";
+     }else {
+       $outstr="No License Granted. All Rights Reserved.";
+     }
+  }else { // APACHE AS DEFAULT
+     if($ptype == "file"){
+       $outstr="Apache License 2.0\n
+Copyright (c) ". date("Y"). " ". $author.$lgithubacct. "\n
+Licensed under the Apache License, Version 2.0 (the 'License'); you may not use any resource from this project or repository except in compliance with the License. You may obtain a copy of the License at\n
+http://www.apache.org/licenses/LICENSE-2.0\n
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.\n
+";
+     }else {
+       $outstr="Apache-2.0";
+     }
+
+  }
+  return $outstr;
+}//endfunc
+//----------------------------------
+//----------------------------------
+//----------------------------------
+//----------------------------------
 function save2git($pdesc=""){
 global $nextver, $relcomment;
   $relcomments = "";
@@ -644,20 +813,13 @@ global $nextver, $relcomment;
   //iterate through project directory for matching files
   $afiles = new DirectoryIterator("./");
   $prjdir = basename(realpath("./"));
-  /*
-  $langtype = "";
-  foreach(explode(" ","go php js html py") as $sfx){
-    if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
-      $langtype = trim($sfx);
-      break;
-    }
-  }//endforeach
-  */
+  
+ 
   $nextver1 = preg_replace("/([\.]{1,1})/", "\\.", $nextver1);
   $nextver1 = preg_replace("/([\-]{1,1})/", "\\-", $nextver1);
 
  foreach ($afiles as $file) {
-  foreach(explode(" ","go php js html py") as $sfx){
+  foreach(explode(" ","prj go php js html py") as $sfx){
    //if(substr($prjdir, strlen($prjdir)-(strlen($sfx)+0)) == "".$sfx){
     if($file->isFile()) {
       if(substr($file, strlen($file)-(strlen($sfx)+1)) == ".".$sfx){

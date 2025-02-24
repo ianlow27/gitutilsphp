@@ -7,6 +7,9 @@
 
 ## Notes
 
+## 0.0.9_250224-1826 - Added new licenses including apache2, mit, mpl, bsd0, bsd2, bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, and all rights reserved
+-  Amendments as per the release description
+
 ## 0.0.8_250107-1029 - Bugfix to getnextversion() returning incorrect literal date instead of placeholder
 -  Amendments as per the release description
 
