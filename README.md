@@ -5,6 +5,7 @@ gitutilsphp facilitates the creation of project that use Git and GitHub
 
 ## LICENSE
 gitutilsphp uses the MIT License which can be found by clicking [on this link](https://github.com/ianlow27/gitutilsphp/blob/main/LICENSE.md)
+<<<<<<< HEAD
 
 ## Installation
 1. Clone this repository into a local directory
@@ -41,3 +42,5 @@ Author name (defaults to 'Fred Blogs'): dfgfdg
 GitHub account name (defaults to 'fblogs101'): dfg      
 License Type (apache2 (default), or mit, mpl, bsd0, bsd2
 , bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, or arr (All Rights Reserved)): dfg        
+=======
+>>>>>>> parent of e2dcf5b (0.0.1_250816-1101 - added gitutilsphp.sh script file)
