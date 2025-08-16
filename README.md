@@ -28,3 +28,16 @@ gitutilsphp uses the MIT License which can be found by clicking [on this link](h
 |-addsave2git | Update to status 'Changes' mode and then save and update to 'Committed' mode |
 |-s          |  save to local Git and remote GitHub repositories |
 
+### Worked Example
+1. Cd to a the parent folder for your project e.g. **cd $C/home/projects**
+1. Run the command **gitutilsphp.sh -n**
+1. When prompted enter the project information for 
+
+Please enter the following information or press 'Enter' for the default. For long text we recommend typing the details in a notepad-like app and then copying and pasting into the CLI prompt...                                
+Project name (defaults to 'myprojphp'): myproj1          
+asdsad ?? (defaults to 'facilitates text processing'):  
+Email (defaults to 'fredbloggs@someemail.com'): fdgfg   
+Author name (defaults to 'Fred Blogs'): dfgfdg          
+GitHub account name (defaults to 'fblogs101'): dfg      
+License Type (apache2 (default), or mit, mpl, bsd0, bsd2
+, bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, or arr (All Rights Reserved)): dfg        
