@@ -32,15 +32,16 @@ gitutilsphp uses the MIT License which can be found by clicking [on this link](h
 ### Worked Example
 1. Cd to a the parent folder for your project e.g. **cd $C/home/projects**
 1. Run the command **gitutilsphp.sh -n**
-1. When prompted enter the project information for 
+1. When prompted enter the information related to the project e.g. 
+    1. Please enter the following information or press 'Enter' for the default. For long text we recommend typing the details in a notepad-like app and then copying and pasting into the CLI prompt...                                
+    1. Project name (defaults to 'myprojphp'): **myproj1**
+    1. Description (defaults to 'facilitates text processing'): **some description**
+    1. Email (defaults to 'fredbloggs@someemail.com'): **some@email.com**
+    1. Author name (defaults to 'Fred Blogs'): **Your Name**
+    1. GitHub account name (defaults to 'fblogs101'): **youraccount**   
+    1. License Type (apache2 (default), or mit, mpl, bsd0, bsd2, bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, or arr (All Rights Reserved)): **mit**        
+1. The folder **myproj1** is created. Cd into the folder
+1. Make the necessary changes to the code
+1. In your account on GitHub create the repository with the same project name
+1. When you are ready to save your changes to GitHub, in the project folder run the command **gitutilsphp.sh -addsave2git**
 
-Please enter the following information or press 'Enter' for the default. For long text we recommend typing the details in a notepad-like app and then copying and pasting into the CLI prompt...                                
-Project name (defaults to 'myprojphp'): myproj1          
-asdsad ?? (defaults to 'facilitates text processing'):  
-Email (defaults to 'fredbloggs@someemail.com'): fdgfg   
-Author name (defaults to 'Fred Blogs'): dfgfdg          
-GitHub account name (defaults to 'fblogs101'): dfg      
-License Type (apache2 (default), or mit, mpl, bsd0, bsd2
-, bsd3, bsd4, cc0, ccby4, ccbysa4, gpl2, gpl3, lgpl2, lgpl3, or arr (All Rights Reserved)): dfg        
-=======
->>>>>>> parent of e2dcf5b (0.0.1_250816-1101 - added gitutilsphp.sh script file)
