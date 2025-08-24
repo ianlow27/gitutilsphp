@@ -23,6 +23,7 @@ init();
 //echo $aIniSettings["GitHub account"]."\n";
 //echo $aIniSettings["firstCommitRef"]."\n";
 //return;
+echo "DO NOT USE THIS IN TMUX!!\n";
 //---------------------!!
 if(isset($argv[1])){
   //-----------------------------------------
